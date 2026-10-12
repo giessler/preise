@@ -34,6 +34,13 @@ button.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
 #cam video{flex:1;width:100%;object-fit:cover;min-height:0}
 #cam .bar{padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));color:#fff;text-align:center}
 textarea{width:100%;height:110px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:8px;font:12px monospace}
+.hl{border:3px solid var(--ac);box-shadow:0 0 0 4px rgba(226,0,26,.18);animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.96);opacity:.4}100%{transform:scale(1);opacity:1}}
+.banner{background:#15803d;color:#fff;border-radius:12px;padding:14px;margin:10px 0;text-align:center}
+.banner .big{font-size:38px;font-weight:800;line-height:1.1}
+.banner .sm{font-size:15px;opacity:.95;margin-top:4px}
+.banner.new{background:#b45309}
+.pname{font-size:20px;font-weight:800}
 .del{background:none;color:var(--mu);border:0;width:auto;padding:4px 8px;font-weight:400}
 </style>
 </head>
@@ -88,20 +95,20 @@ function open(k,name){
   var stores=[];Object.keys(db).forEach(function(x){db[x].prices.forEach(function(e){if(stores.indexOf(e.store)<0)stores.push(e.store)})});
   if(stores.indexOf('Kaufland')<0)stores.unshift('Kaufland');
   if(p){var b=best(p);
-    h+='<b>'+esc(p.name)+'</b><div class="mu">'+(k.indexOf('n:')===0?'ohne Strichcode':k)+'</div>';
-    h+='<p>Günstigster Preis: <span class="best">'+eur(b.price)+'</span> bei '+esc(b.store)+' <span class="mu">('+b.date+')</span></p>';
+    h+='<div class="pname">'+esc(p.name)+'</div><div class="mu">'+(k.indexOf('n:')===0?'ohne Strichcode':k)+'</div>';
+    h+='<div class="banner"><div class="sm">Günstigster Preis</div><div class="big">'+eur(b.price)+'</div><div class="sm">bei '+esc(b.store)+' · '+b.date+'</div></div>';
     h+=p.prices.slice().sort(function(a,b){return a.price-b.price}).map(function(e){var i=p.prices.indexOf(e);
       return '<div class="top mu"><span>'+esc(e.store)+' · '+e.date+'</span><span>'+eur(e.price)+' <button class="del" data-d="'+i+'">✕</button></span></div>'}).join('');
     h+='<hr style="border:0;border-top:1px solid var(--bd);margin:12px 0"><b>Neuen Preis eintragen</b><div style="height:8px"></div>';
   }else{
-    h+='<b>Neues Produkt</b><div class="mu" style="margin-bottom:8px">'+(k.indexOf('n:')===0?'ohne Strichcode':'Strichcode '+k)+'</div>';
+    h+='<div class="banner new"><div class="big" style="font-size:24px">Neues Produkt</div><div class="sm">'+(k.indexOf('n:')===0?'ohne Strichcode':'Strichcode '+k)+'</div></div>';
     h+='<input id="fn" placeholder="Produktname" value="'+esc(name||'')+'">';
   }
   h+='<div class="row"><input id="fp" inputmode="decimal" placeholder="Preis, z. B. 1,29"><input id="fs" list="sl" placeholder="Laden" value="Kaufland"></div>';
   h+='<datalist id="sl">'+stores.map(function(s){return '<option value="'+esc(s)+'">'}).join('')+'</datalist>';
   h+='<button id="sv">Preis speichern</button>';
   if(p)h+='<button class="sec" id="rm" style="margin-top:8px">Produkt löschen</button>';
-  var d=$('detail');d.innerHTML=h;d.style.display='block';d.scrollIntoView({behavior:'smooth'});
+  var d=$('detail');d.innerHTML=h;d.style.display='block';d.classList.remove('hl');void d.offsetWidth;d.classList.add('hl');d.scrollIntoView({behavior:'smooth'});
 }
 
 function lookup(txt){
