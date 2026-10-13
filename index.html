@@ -113,7 +113,7 @@ function open(k,name){
 }
 
 function fetchName(code){
-  var hosts=['world.openfoodfacts.org','world.openproductsfacts.org','world.openbeautyfacts.org'],i=0;
+  var hosts=['world.openfoodfacts.org','world.openpetfoodfacts.org','world.openproductsfacts.org','world.openbeautyfacts.org'],i=0;
   function hint(t){var h=$('fhint');if(h&&current===code)h.textContent=t}
   hint('Suche Produktname im Internet …');
   if(navigator.onLine===false)return hint('Kein Internet. Bitte Namen selbst eintippen.');
@@ -121,7 +121,7 @@ function fetchName(code){
     if(i>=hosts.length)return hint('Nicht in der Datenbank gefunden. Bitte Namen eintippen.');
     var ctrl=new AbortController(),t=setTimeout(function(){ctrl.abort()},6000);
     fetch('https://'+hosts[i++]+'/api/v2/product/'+code+'.json?fields=product_name,product_name_de,brands,quantity',{signal:ctrl.signal})
-    .then(function(r){return r.json()})
+    .then(function(r){return r.json().catch(function(){return null})})
     .then(function(d){
       clearTimeout(t);
       var p=d&&d.status===1&&d.product,n=p&&(p.product_name_de||p.product_name);
