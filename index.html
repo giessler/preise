@@ -103,6 +103,7 @@ function open(k,name){
   }else{
     h+='<div class="banner new"><div class="big" style="font-size:24px">Neues Produkt</div><div class="sm">'+(k.indexOf('n:')===0?'ohne Strichcode':'Strichcode '+k)+'</div></div>';
     h+='<input id="fn" placeholder="Produktname" value="'+esc(name||'')+'"><div class="mu" id="fhint" style="margin:-4px 0 8px"></div>';
+    if(/^\d{6,}$/.test(k))h+='<button class="sec" id="eanweb" style="margin-bottom:8px">🔎 Auf ean-suche.de nachschlagen</button>';
   }
   h+='<div class="row"><input id="fp" inputmode="decimal" placeholder="Preis, z. B. 1,29"><input id="fs" list="sl" placeholder="Laden" value="Kaufland"></div>';
   h+='<datalist id="sl">'+stores.map(function(s){return '<option value="'+esc(s)+'">'}).join('')+'</datalist>';
@@ -154,6 +155,10 @@ $('q').onkeydown=function(e){if(e.key==='Enter')lookup(this.value)};
 $('list').onclick=function(e){var t=e.target.closest('.item');if(t)open(t.getAttribute('data-k'))};
 $('detail').onclick=function(e){
   var t=e.target;
+  if(t.id==='eanweb'){
+    var h=$('fhint');if(h)h.textContent='ean-suche.de ist geöffnet. Danach hierher zurückkehren und den Namen eintippen.';
+    window.open('https://www.ean-suche.de/?q='+encodeURIComponent(current),'_blank');return;
+  }
   if(t.id==='sv'){
     var pr=parseFloat(($('fp').value||'').replace(',','.'));
     if(!(pr>0))return alert('Bitte einen Preis eingeben.');
