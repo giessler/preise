@@ -70,6 +70,8 @@ textarea{width:100%;height:110px;border-radius:10px;border:1px solid var(--bd);b
   <textarea id="bk" style="display:none;margin-top:8px" placeholder="Hier Backup einfügen und nochmal auf „Daten einfügen“ tippen"></textarea>
 </div>
 
+<p class="mu" id="ver" style="text-align:center;margin:4px 0 16px"></p>
+
 <div id="cam"><video id="vid" playsinline muted></video><div class="bar"><div id="camMsg" style="margin-bottom:10px">Strichcode ins Bild halten …</div><button class="sec" id="stop">Abbrechen</button></div></div>
 
 <script src="zxing.min.js"></script>
@@ -210,6 +212,9 @@ $('imp').onclick=function(){
 };
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
+var VERSION='v7',BUILD='13.10.2026';
+$('ver').textContent='Version '+VERSION+' · '+BUILD;
+if(window.caches)caches.keys().then(function(k){var c=k.filter(function(x){return x.indexOf('preise-')===0})[0];if(c)$('ver').textContent+=' · Speicher '+c.replace('preise-','')}).catch(function(){});
 load();renderList();
 </script>
 </body>
