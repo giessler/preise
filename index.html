@@ -102,13 +102,38 @@ function open(k,name){
     h+='<hr style="border:0;border-top:1px solid var(--bd);margin:12px 0"><b>Neuen Preis eintragen</b><div style="height:8px"></div>';
   }else{
     h+='<div class="banner new"><div class="big" style="font-size:24px">Neues Produkt</div><div class="sm">'+(k.indexOf('n:')===0?'ohne Strichcode':'Strichcode '+k)+'</div></div>';
-    h+='<input id="fn" placeholder="Produktname" value="'+esc(name||'')+'">';
+    h+='<input id="fn" placeholder="Produktname" value="'+esc(name||'')+'"><div class="mu" id="fhint" style="margin:-4px 0 8px"></div>';
   }
   h+='<div class="row"><input id="fp" inputmode="decimal" placeholder="Preis, z. B. 1,29"><input id="fs" list="sl" placeholder="Laden" value="Kaufland"></div>';
   h+='<datalist id="sl">'+stores.map(function(s){return '<option value="'+esc(s)+'">'}).join('')+'</datalist>';
   h+='<button id="sv">Preis speichern</button>';
   if(p)h+='<button class="sec" id="rm" style="margin-top:8px">Produkt löschen</button>';
   var d=$('detail');d.innerHTML=h;d.style.display='block';d.classList.remove('hl');void d.offsetWidth;d.classList.add('hl');d.scrollIntoView({behavior:'smooth'});
+  if(!p&&/^\d{6,}$/.test(k))fetchName(k);
+}
+
+function fetchName(code){
+  var hosts=['world.openfoodfacts.org','world.openproductsfacts.org','world.openbeautyfacts.org'],i=0;
+  function hint(t){var h=$('fhint');if(h&&current===code)h.textContent=t}
+  hint('Suche Produktname im Internet …');
+  if(navigator.onLine===false)return hint('Kein Internet. Bitte Namen selbst eintippen.');
+  (function next(){
+    if(i>=hosts.length)return hint('Nicht in der Datenbank gefunden. Bitte Namen eintippen.');
+    var ctrl=new AbortController(),t=setTimeout(function(){ctrl.abort()},6000);
+    fetch('https://'+hosts[i++]+'/api/v2/product/'+code+'.json?fields=product_name,product_name_de,brands,quantity',{signal:ctrl.signal})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      clearTimeout(t);
+      var p=d&&d.status===1&&d.product,n=p&&(p.product_name_de||p.product_name);
+      if(!n)return next();
+      var b=(p.brands||'').split(',')[0].trim();
+      if(b&&n.toLowerCase().indexOf(b.toLowerCase())<0)n=b+' '+n;
+      if(p.quantity&&n.toLowerCase().indexOf(p.quantity.toLowerCase())<0)n+=' '+p.quantity;
+      var f=$('fn');
+      if(f&&current===code){if(!f.value.trim())f.value=n;hint('Name aus dem Internet geladen. Bitte kurz prüfen.')}
+    })
+    .catch(function(){clearTimeout(t);hint('Kein Internet oder keine Antwort. Bitte Namen selbst eintippen.')});
+  })();
 }
 
 function lookup(txt){
